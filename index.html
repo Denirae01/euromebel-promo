@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Испытай удачу — скидка на мягкую мебель | EuroMebel</title>
+<meta name="description" content="Открой три карты и получи промокод на скидку на всю мягкую мебель EuroMebel.">
+<meta property="og:title" content="EuroMebel — Испытай удачу">
+<meta property="og:description" content="Открой три карты и получи промокод на скидку на мягкую мебель.">
+<meta name="theme-color" content="#E30016">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+<script src="config.js"></script>
+</head>
+<body>
+
+<header class="top">
+  <a class="logo" href="https://euromebel.kz/" aria-label="EuroMebel — на главную">
+    <img src="assets/logo.svg" alt="EuroMebel" width="228" height="34">
+  </a>
+  <div class="top-right">
+    <span class="tagline">26 лет мебели по европейским технологиям</span>
+    <a class="phone" data-phone href="tel:+77059244044">+7 705 924 40 44</a>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="game" aria-live="polite">
+    <span class="eyebrow">Игра от EuroMebel</span>
+    <h1>Испытай <span class="blue">удачу</span></h1>
+    <p class="lead">Открой три карты. Совпадут все три — скидка <b class="accent" data-prize>−20%</b> <span data-scope>на всю мягкую мебель</span> ваша. Промокод пришлём на почту.</p>
+
+    <div class="cards" role="group" aria-label="Карты">
+      <button type="button" class="card" data-card="0" aria-label="Открыть карту 1"></button>
+      <button type="button" class="card" data-card="1" aria-label="Открыть карту 2"></button>
+      <button type="button" class="card" data-card="2" aria-label="Открыть карту 3"></button>
+    </div>
+
+    <p class="status" id="status">Открыто <span id="opened">0</span> из 3 · нажмите на карту</p>
+
+    <form class="claim" id="claim" hidden novalidate>
+      <h2>Совпадение! Скидка <span class="accent" data-prize>−20%</span> ваша</h2>
+      <label for="email">Куда отправить промокод?</label>
+      <div class="row">
+        <input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="name@mail.kz" required>
+        <button type="submit" class="btn" id="submitBtn">Получить промокод</button>
+      </div>
+      <!-- ловушка для ботов: люди это поле не видят -->
+      <input class="hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="error" id="error" role="alert" hidden></p>
+      <p class="consent">Нажимая кнопку, вы соглашаетесь получать письма от EuroMebel и с <a data-privacy href="https://euromebel.kz/personal-information" target="_blank" rel="noopener">политикой конфиденциальности</a>.</p>
+    </form>
+
+    <div class="done" id="done" hidden>
+      <div class="done-head">
+        <span class="check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+        <h2>Промокод уже летит</h2>
+      </div>
+      <p>Отправим его на <b id="doneEmail"></b>. Если письма нет — загляните в «Промоакции» или «Спам».<span id="validLine"></span></p>
+      <a class="btn" data-catalog href="https://euromebel.kz/">Перейти в каталог</a>
+    </div>
+  </section>
+
+  <aside class="hero" aria-hidden="true">
+    <span class="badge" data-prize>−20%</span>
+    <img class="sofa" src="assets/sofa.png" alt="" width="298" height="148">
+    <div class="hero-text">
+      <span class="big" data-prize>−20%</span>
+      <span class="scope" data-scope>на всю мягкую мебель</span>
+    </div>
+  </aside>
+</main>
+
+<template id="cardFaces">
+  <span class="inner">
+    <span class="face back"><span class="frame"></span><span class="q">?</span></span>
+    <span class="face front">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3"/><path d="M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/><path d="M5 18v2M19 18v2"/></svg>
+      <b data-prize>−20%</b>
+    </span>
+  </span>
+</template>
+
+<script src="app.js"></script>
+</body>
+</html>

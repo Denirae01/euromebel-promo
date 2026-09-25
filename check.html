@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Проверка промокода — EuroMebel</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+<script src="config.js"></script>
+<style>
+  .wrap { max-width: 480px; width: 100%; margin: 0 auto; padding: 24px 20px 48px; display: flex; flex-direction: column; gap: 16px; }
+  .wrap h1 { font-size: 34px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 14px; font-weight: 600; color: var(--ink-2); }
+  .field input { height: 56px; padding: 0 18px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--paper); font: 600 18px var(--font); color: var(--ink); }
+  #code { text-transform: uppercase; letter-spacing: .08em; font-size: 22px; }
+  .btns { display: flex; gap: 12px; }
+  .btns .btn { flex: 1; height: 56px; padding: 0 16px; }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
+  .btn.ghost:hover { background: rgba(31,26,23,.06); }
+  .result { border-radius: 16px; padding: 18px 20px; font-size: 17px; line-height: 1.5; font-weight: 600; }
+  .result.ok { background: #E3EFE6; color: #1C4A2B; }
+  .result.warn { background: #F7E6D2; color: #6B3A0C; }
+  .result.bad { background: #F6DEDB; color: #7A1A12; }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="index.html"><img src="assets/logo.svg" alt="EuroMebel" height="28"></a>
+</header>
+<main class="wrap">
+  <h1>Проверка промокода</h1>
+  <form id="f" class="wrap" style="padding:0" novalidate>
+    <div class="field"><label for="salon">Салон</label><input id="salon" autocomplete="organization" placeholder="Алматы, ТК Мерей"></div>
+    <div class="field"><label for="pin">PIN сотрудника</label><input id="pin" type="password" inputmode="numeric" autocomplete="current-password"></div>
+    <div class="field"><label for="code">Промокод</label><input id="code" autocomplete="off" placeholder="SOFT20-XXXXXX"></div>
+    <div class="btns">
+      <button type="submit" class="btn ghost" data-act="check">Проверить</button>
+      <button type="button" class="btn" data-act="redeem" id="redeem">Погасить</button>
+    </div>
+  </form>
+  <div id="out" class="result" role="status" hidden></div>
+</main>
+<script>
+(function () {
+  var C = window.PROMO_CONFIG || {};
+  var $ = function (id) { return document.getElementById(id); };
+  try { $("salon").value = localStorage.getItem("em_salon") || ""; } catch (e) {}
+
+  var MSG = {
+    "выдан": ["ok", "Код действителен"],
+    "погашен": ["bad", "Код уже использован"],
+    "свободен": ["warn", "Код не выдавался покупателю"],
+    not_found: ["bad", "Такого кода нет"],
+    bad_pin: ["bad", "Неверный PIN"],
+    already_redeemed: ["bad", "Код уже использован"],
+    not_issued: ["warn", "Код не выдавался покупателю — гасить нельзя"],
+    staff_disabled: ["warn", "Проверка кодов не включена (STAFF_PIN не задан)"],
+    rate_limited: ["bad", "Слишком много неверных попыток, подождите 10 минут"]
+  };
+  function show(kind, text) { var o = $("out"); o.className = "result " + kind; o.textContent = text; o.hidden = false; }
+
+  function send(action) {
+    if (!C.apiUrl) { show("warn", "apiUrl не задан в config.js"); return; }
+    var code = $("code").value.trim().toUpperCase();
+    if (!code) { show("warn", "Введите промокод"); return; }
+    if (action === "redeem" && !confirm("Погасить код " + code + "? Отменить будет нельзя.")) return;
+    try { localStorage.setItem("em_salon", $("salon").value); } catch (e) {}
+    show("warn", "Проверяем…");
+    fetch(C.apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: action, code: code, pin: $("pin").value, salon: $("salon").value })
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (res.ok && action === "redeem") return show("ok", "Погашено. Скидка " + res.discount + " " + res.scope + ".");
+      if (res.ok) {
+        var m = MSG[res.status] || ["warn", res.status];
+        var extra = res.status === "выдан" ? ": скидка " + res.discount + " " + res.scope :
+                    res.status === "погашен" && res.redeemedAt ? " (" + res.redeemedAt + (res.salon ? ", " + res.salon : "") + ")" : "";
+        return show(m[0], m[1] + extra);
+      }
+      var e = MSG[res.error] || ["bad", "Ошибка: " + res.error];
+      show(e[0], e[1]);
+    }).catch(function () { show("bad", "Нет связи с сервером"); });
+  }
+  $("f").addEventListener("submit", function (e) { e.preventDefault(); send("check"); });
+  $("redeem").addEventListener("click", function () { send("redeem"); });
+})();
+</script>
+</body>
+</html>
